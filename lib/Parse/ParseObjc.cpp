@@ -2072,6 +2072,9 @@ ExprResult Parser::ParseObjCAtExpression(SourceLocation AtLoc) {
   case tok::at:
     // Objective-C NSURL expression
     ConsumeToken(); // Consume the additional @ token.
+    if (!Tok.is(tok::string_literal)) {
+      return ExprError(Diag(AtLoc, diag::err_unexpected_at));
+    }
     return ParsePostfixExpressionSuffix(ParseObjCURLLiteral(AtLoc));
           
   default:
