@@ -1405,6 +1405,7 @@ private:
   // Objective-C Expressions
   ExprResult ParseObjCAtExpression(SourceLocation AtLocation);
   ExprResult ParseObjCStringLiteral(SourceLocation AtLoc);
+  ExprResult ParseObjCURLLiteral(SourceLocation AtLoc);
   ExprResult ParseObjCCharacterLiteral(SourceLocation AtLoc);
   ExprResult ParseObjCNumericLiteral(SourceLocation AtLoc);
   ExprResult ParseObjCBooleanLiteral(SourceLocation AtLoc, bool ArgValue);

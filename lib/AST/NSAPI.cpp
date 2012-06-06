@@ -26,7 +26,8 @@ IdentifierInfo *NSAPI::getNSClassId(NSClassIdKindKind K) const {
     "NSMutableArray",
     "NSDictionary",
     "NSMutableDictionary",
-    "NSNumber"
+    "NSNumber",
+    "NSURL"
   };
 
   if (!ClassIds[K])
@@ -398,4 +399,13 @@ bool NSAPI::isObjCEnumerator(const Expr *E,
       return EnumD->getIdentifier() == II;
 
   return false;
+}
+
+Selector NSAPI::getNSURLLiteralSelector(clang::NSAPI::NSURLLiteralMethodKind MK) const {
+  if (NSURLSelectors[MK].isNull()) {
+    Selector Sel;
+    Sel = Ctx.Selectors.getUnarySelector(&Ctx.Idents.get("URLWithString"));
+    return (NSURLSelectors[MK] = Sel);
+  }
+  return NSURLSelectors[MK];
 }

@@ -2069,6 +2069,11 @@ ExprResult Parser::ParseObjCAtExpression(SourceLocation AtLoc) {
     // Objective-C boxed expression
     return ParsePostfixExpressionSuffix(ParseObjCBoxedExpr(AtLoc));
           
+  case tok::at:
+    // Objective-C NSURL expression
+    ConsumeToken(); // Consume the additional @ token.
+    return ParsePostfixExpressionSuffix(ParseObjCURLLiteral(AtLoc));
+          
   default:
     if (Tok.getIdentifierInfo() == 0)
       return ExprError(Diag(AtLoc, diag::err_unexpected_at));
@@ -2548,6 +2553,13 @@ ExprResult Parser::ParseObjCStringLiteral(SourceLocation AtLoc) {
 
   return Owned(Actions.ParseObjCStringLiteral(&AtLocs[0], AtStrings.take(),
                                               AtStrings.size()));
+}
+
+ExprResult Parser::ParseObjCURLLiteral(clang::SourceLocation AtLoc) {
+    ExprResult Res(ParseStringLiteralExpression());
+    if (Res.isInvalid()) return move(Res);
+    
+    return Owned(Actions.BuildObjCURLLiteral(AtLoc, Res.take()));
 }
 
 /// ParseObjCBooleanLiteral -

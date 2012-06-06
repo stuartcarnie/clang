@@ -32,9 +32,10 @@ public:
     ClassId_NSMutableArray,
     ClassId_NSDictionary,
     ClassId_NSMutableDictionary,
-    ClassId_NSNumber
+    ClassId_NSNumber,
+    ClassId_NSURL
   };
-  static const unsigned NumClassIds = 7;
+  static const unsigned NumClassIds = 8;
 
   enum NSStringMethodKind {
     NSStr_stringWithString,
@@ -154,7 +155,17 @@ public:
   bool isObjCNSIntegerType(QualType T) const;
   /// \brief Returns true if \param T is a typedef of "NSUInteger" in objective-c.
   bool isObjCNSUIntegerType(QualType T) const;
-
+    
+  enum NSURLLiteralMethodKind {
+    NSURLWithString      
+  };
+  static const unsigned NumNSURLLiteralMethods = 1;
+  
+  /// \brief The Objective-C NSURL selectors.
+  Selector getNSURLLiteralSelector(NSURLLiteralMethodKind MK) const;
+  
+  
+ 
 private:
   bool isObjCTypedef(QualType T, StringRef name, IdentifierInfo *&II) const;
   bool isObjCEnumerator(const Expr *E,
@@ -175,6 +186,9 @@ private:
   /// \brief The Objective-C NSNumber selectors used to create NSNumber literals.
   mutable Selector NSNumberClassSelectors[NumNSNumberLiteralMethods];
   mutable Selector NSNumberInstanceSelectors[NumNSNumberLiteralMethods];
+  
+  /// \brief The Objective-C NSURL selectors used to create NSURL literals.
+  mutable Selector NSURLSelectors[NumNSURLLiteralMethods];
 
   mutable IdentifierInfo *BOOLId, *NSIntegerId, *NSUIntegerId;
   mutable IdentifierInfo *NSASCIIStringEncodingId, *NSUTF8StringEncodingId;

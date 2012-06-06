@@ -525,6 +525,16 @@ public:
 
   /// \brief The declaration of the dictionaryWithObjects:forKeys:count: method.
   ObjCMethodDecl *DictionaryWithObjectsMethod;
+  
+  /// \brief Pointer to NSURL type (NSURL *).
+  QualType NSURLPointer;
+  
+  /// \brief The declaration of the Objective-C NSURL class.
+  ObjCInterfaceDecl *NSURLDecl;
+
+  /// \brief The declaration of the URLWithString: method.
+  ObjCMethodDecl *URLWithStringMethod;
+    
 
   /// \brief id<NSCopying> type.
   QualType QIDNSCopying;
@@ -4054,6 +4064,8 @@ public:
                                     unsigned NumStrings);
     
   ExprResult BuildObjCStringLiteral(SourceLocation AtLoc, StringLiteral *S);
+    
+  ExprResult BuildObjCURLLiteral(SourceLocation AtLoc, Expr *String);
   
   /// BuildObjCNumericLiteral - builds an ObjCBoxedExpr AST node for the
   /// numeric literal expression. Type of the expression will be "NSNumber *"

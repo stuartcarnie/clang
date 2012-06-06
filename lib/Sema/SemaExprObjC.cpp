@@ -140,6 +140,55 @@ ExprResult Sema::BuildObjCStringLiteral(SourceLocation AtLoc, StringLiteral *S){
   return new (Context) ObjCStringLiteral(S, Ty, AtLoc);
 }
 
+ExprResult Sema::BuildObjCURLLiteral(SourceLocation AtLoc, Expr *String) {
+  StringLiteral *S = reinterpret_cast<StringLiteral*>(String);
+  if (CheckObjCString(S))
+      return true;
+    
+  ExprResult ObjCString = BuildObjCStringLiteral(AtLoc, S);
+  
+  ASTContext &CX = Context;
+  
+  // Look up the NSURL class, if we haven't done so already.
+  if (!NSURLDecl) {
+    NamedDecl *IF = LookupSingleName(TUScope,
+                                     NSAPIObj->getNSClassId(NSAPI::ClassId_NSURL),
+                                     AtLoc,
+                                     LookupOrdinaryName);
+    NSURLDecl = dyn_cast_or_null<ObjCInterfaceDecl>(IF);
+    if (!NSURLDecl && getLangOpts().DebuggerObjCLiteral)
+      NSURLDecl =  ObjCInterfaceDecl::Create (Context,
+                                                Context.getTranslationUnitDecl(),
+                                                SourceLocation(),
+                                                NSAPIObj->getNSClassId(NSAPI::ClassId_NSURL),
+                                                0, SourceLocation());
+    
+    if (!NSURLDecl) {
+      Diag(AtLoc, diag::err_undeclared_nsurl);
+      return ExprError();
+    }
+    
+    // generate the pointer to NSURL type.
+    QualType NSURLObject = CX.getObjCInterfaceType(NSURLDecl);
+    NSURLPointer = CX.getObjCObjectPointerType(NSURLObject);
+  }
+  
+  if (!URLWithStringMethod) {
+    Selector Sel = NSAPIObj->getNSURLLiteralSelector(NSAPI::NSURLWithString);
+    URLWithStringMethod = NSURLDecl->lookupClassMethod(Sel);
+  }
+  
+  if (!URLWithStringMethod)
+    return ExprError();
+  
+  SourceRange SR(S->getSourceRange());
+
+  // Use the effective source range of the literal, including the leading '@'.
+  return MaybeBindToTemporary(
+                              new (Context) ObjCBoxedExpr(ObjCString.take(), NSURLPointer, URLWithStringMethod,
+                                                          SourceRange(AtLoc, SR.getEnd())));
+}
+
 /// \brief Emits an error if the given method does not exist, or if the return
 /// type is not an Objective-C object.
 static bool validateBoxingMethod(Sema &S, SourceLocation Loc,
